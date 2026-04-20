@@ -174,11 +174,12 @@ export default function Settings() {
                        <div className="p-2 bg-blue-500/20 text-blue-500 rounded-lg"><RefreshCcw size={20}/></div>
                        <h4 className="font-bold text-white">Moneda Local</h4>
                     </div>
-                    <select className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none">
-                       <option value="PEN" className="bg-bg-dark">Soles Peruanos (PEN)</option>
-                       <option value="ARS" className="bg-bg-dark">Pesos Argentinos (ARS)</option>
-                       <option value="MXN" className="bg-bg-dark">Pesos Mexicanos (MXN)</option>
-                    </select>
+                     <select className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none">
+                        <option value="PEN" className="bg-bg-dark">Soles Peruanos (PEN)</option>
+                        <option value="COP" className="bg-bg-dark">Pesos Colombianos (COP)</option>
+                        <option value="ARS" className="bg-bg-dark">Pesos Argentinos (ARS)</option>
+                        <option value="MXN" className="bg-bg-dark">Pesos Mexicanos (MXN)</option>
+                     </select>
                  </div>
               </div>
 

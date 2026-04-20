@@ -155,7 +155,7 @@ export default function Sales() {
               <p className="font-bold text-white text-sm mb-0.5">{p.name}</p>
               <p className="text-[9px] text-text-dim uppercase font-bold">{p.category_name || 'Sin Categoría'}</p>
               <div className="mt-3 flex items-center justify-between">
-                <span className="text-lg font-black text-accent italic">${(p.price || 0).toFixed(2)}</span>
+                <span className="text-lg font-black text-accent italic">{selectedCurrency?.symbol || '$'}{(p.price || 0).toLocaleString()}</span>
                 <Plus size={14} className="text-text-dim group-hover:text-white" />
               </div>
             </button>
@@ -190,7 +190,7 @@ export default function Sales() {
               <div key={item.product_id} className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-white text-sm truncate">{item.name}</p>
-                  <p className="text-[10px] text-accent">${(item.unit_price || 0).toFixed(2)}</p>
+                  <p className="text-[10px] text-accent">{selectedCurrency?.symbol || '$'}{(item.unit_price || 0).toLocaleString()}</p>
                 </div>
                 <div className="flex items-center bg-black/20 rounded-lg p-1">
                   <button onClick={() => updateQuantity(item.product_id, -1)} className="w-6 h-6 flex items-center justify-center text-text-dim hover:text-white">
@@ -207,13 +207,13 @@ export default function Sales() {
         </div>
 
         <div className="p-4 bg-white/5 border-t border-white/10 space-y-3">
-          <div className="flex justify-between text-xs">
-            <span className="text-text-dim">Subtotal</span>
-            <span className="text-white font-bold">${(subtotal || 0).toFixed(2)}</span>
+          <div className="flex justify-between items-center text-xs">
+            <span className="text-body font-bold text-white">Subtotal</span>
+            <span className="text-white font-bold">{selectedCurrency?.symbol || '$'}{(subtotal || 0).toLocaleString()}</span>
           </div>
           <div className="flex justify-between items-center pt-3 border-t border-white/10">
             <span className="text-white font-bold uppercase text-[10px]">Total</span>
-            <span className="text-xl font-black text-accent">${(total || 0).toFixed(2)}</span>
+            <span className="text-xl font-black text-accent">{selectedCurrency?.symbol || '$'}{(total || 0).toLocaleString()}</span>
           </div>
 
           <button 

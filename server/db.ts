@@ -125,7 +125,9 @@ if (userCount.count === 0) {
 
   db.prepare("INSERT INTO currencies (code, name, symbol, is_main) VALUES ('USD', 'Dólar Estadounidense', '$', 1)").run();
   db.prepare("INSERT INTO currencies (code, name, symbol, is_main) VALUES ('PEN', 'Sol Peruano', 'S/', 0)").run();
+  db.prepare("INSERT INTO currencies (code, name, symbol, is_main) VALUES ('COP', 'Peso Colombiano', '$', 0)").run();
   db.prepare("INSERT INTO exchange_rates (from_currency, to_currency, rate) VALUES ('USD', 'PEN', 3.75)").run();
+  db.prepare("INSERT INTO exchange_rates (from_currency, to_currency, rate) VALUES ('USD', 'COP', 4000)").run();
   
   db.prepare("INSERT INTO warehouses (name, location) VALUES ('Almacén Central', 'Sede Principal')").run();
   db.prepare("INSERT INTO categories (name) VALUES ('Bebidas'), ('Alimentos'), ('Limpieza')").run();
