@@ -72,7 +72,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex flex-col w-60 glass border-r-0 z-50">
+      <aside className="hidden lg:flex flex-col w-52 glass border-r-0 z-50 shrink-0">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-10">
             <div className="p-1.5 bg-accent/20 rounded-lg text-accent border border-accent/30 shadow-[0_0_15px_rgba(56,189,248,0.2)]">
@@ -125,7 +125,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         </header>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 lg:p-10 relative">
+        <div className="flex-1 overflow-y-auto p-4 lg:p-6 relative">
            {children}
         </div>
 

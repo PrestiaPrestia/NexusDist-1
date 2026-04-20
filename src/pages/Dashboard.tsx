@@ -25,7 +25,7 @@ import { motion } from 'motion/react';
 const StatCard = ({ title, value, icon: Icon, color, trend }: any) => (
   <motion.div 
     whileHover={{ y: -4, backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
-    className="glass-card p-6 border-white/10"
+    className="glass-card p-5 border-white/10"
   >
     <div className="flex items-start justify-between">
       <div>
@@ -60,7 +60,7 @@ export default function Dashboard() {
   if (!stats) return <div className="text-text-dim animate-pulse">Cargando dashboard...</div>;
 
   return (
-    <div className="space-y-10 pb-10">
+    <div className="space-y-6 pb-6">
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight">Panel Administrativo</h1>
@@ -99,7 +99,7 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Sales Chart */}
-        <div className="glass-card p-8 border-white/10">
+        <div className="glass-card p-6 border-white/10">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-lg font-bold text-white">Rendimiento Semanal</h3>
             <span className="px-3 py-1 bg-accent/10 text-accent text-[10px] font-extrabold rounded-md border border-accent/20 uppercase tracking-widest">Octubre 2026</span>
@@ -144,7 +144,7 @@ export default function Dashboard() {
         </div>
 
         {/* Low Stock Alerts */}
-        <div className="glass-card p-8 border-white/10">
+        <div className="glass-card p-6 border-white/10">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-lg font-bold text-white uppercase tracking-tight">Estado de Inventario</h3>
             <span className="flex items-center gap-2 text-[11px] font-bold text-text-dim">

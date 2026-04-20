@@ -122,41 +122,41 @@ export default function Sales() {
     <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-120px)] animate-in fade-in duration-500">
       {/* Catalogo (Izquierda) */}
       <div className="flex-1 flex flex-col min-w-0 glass p-1 border-white/5 rounded-3xl overflow-hidden">
-        <div className="p-6 space-y-4">
+        <div className="p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-white tracking-tight">Ventas</h1>
+            <h1 className="text-xl font-bold text-white tracking-tight">Ventas</h1>
             {showSuccess && (
-              <div className="bg-green-500/20 text-green-400 px-4 py-1.5 rounded-full text-xs font-bold border border-green-500/30 flex items-center gap-2">
-                <CheckCircle2 size={14} />
-                ¡Venta completada con éxito!
+              <div className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-[10px] font-bold border border-green-500/30 flex items-center gap-2">
+                <CheckCircle2 size={12} />
+                ¡Éxito!
               </div>
             )}
           </div>
           
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim" size={18} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-dim" size={16} />
             <input 
               type="text" 
               placeholder="Buscar productos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-2xl focus:ring-1 focus:ring-accent outline-none text-white transition-all"
+              className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl focus:ring-1 focus:ring-accent outline-none text-white transition-all text-sm"
             />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 auto-rows-max custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 auto-rows-max custom-scrollbar">
           {filteredProducts.map(p => (
             <button 
               key={p.id}
               onClick={() => addToCart(p)}
-              className="group p-4 bg-white/5 border border-white/10 rounded-2xl hover:border-accent/40 text-left transition-all relative overflow-hidden"
+              className="group p-3 bg-white/5 border border-white/10 rounded-xl hover:border-accent/40 text-left transition-all relative overflow-hidden"
             >
-              <p className="font-bold text-white mb-1">{p.name}</p>
-              <p className="text-[10px] text-text-dim uppercase font-bold">{p.category_name || 'Sin Categoría'}</p>
-              <div className="mt-4 flex items-center justify-between">
-                <span className="text-xl font-black text-accent italic">${(p.price || 0).toFixed(2)}</span>
-                <Plus size={16} className="text-text-dim group-hover:text-white" />
+              <p className="font-bold text-white text-sm mb-0.5">{p.name}</p>
+              <p className="text-[9px] text-text-dim uppercase font-bold">{p.category_name || 'Sin Categoría'}</p>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-lg font-black text-accent italic">${(p.price || 0).toFixed(2)}</span>
+                <Plus size={14} className="text-text-dim group-hover:text-white" />
               </div>
             </button>
           ))}
@@ -206,20 +206,20 @@ export default function Sales() {
           )}
         </div>
 
-        <div className="p-6 bg-white/5 border-t border-white/10 space-y-4">
-          <div className="flex justify-between text-sm">
+        <div className="p-4 bg-white/5 border-t border-white/10 space-y-3">
+          <div className="flex justify-between text-xs">
             <span className="text-text-dim">Subtotal</span>
             <span className="text-white font-bold">${(subtotal || 0).toFixed(2)}</span>
           </div>
-          <div className="flex justify-between items-center pt-4 border-t border-white/10">
-            <span className="text-white font-bold uppercase text-xs">Total</span>
-            <span className="text-2xl font-black text-accent">${(total || 0).toFixed(2)}</span>
+          <div className="flex justify-between items-center pt-3 border-t border-white/10">
+            <span className="text-white font-bold uppercase text-[10px]">Total</span>
+            <span className="text-xl font-black text-accent">${(total || 0).toFixed(2)}</span>
           </div>
 
           <button 
             disabled={cart.length === 0 || isProcessing}
             onClick={handleCheckout}
-            className={`w-full py-4 rounded-xl font-bold uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2 ${
+            className={`w-full py-3.5 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 ${
               cart.length === 0 || isProcessing 
               ? 'bg-white/5 text-text-dim cursor-not-allowed' 
               : 'bg-accent text-bg-dark hover:brightness-110 active:scale-95 shadow-lg shadow-accent/20'
@@ -227,7 +227,7 @@ export default function Sales() {
           >
             {isProcessing ? 'Procesando...' : (
               <>
-                <CreditCard size={18} />
+                <CreditCard size={16} />
                 Confirmar Venta
               </>
             )}
