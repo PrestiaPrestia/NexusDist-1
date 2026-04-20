@@ -61,8 +61,8 @@ export default function MobileSeller() {
 
   // Client registration
   const [showRegisterClient, setShowRegisterClient] = useState(false);
-  const [newClient, setNewClient] = useState({ document_id: '', name: '', phone: '', email: '' });
   const [registerLoading, setRegisterLoading] = useState(false);
+  const [newClient, setNewClient] = useState({ document_id: '', name: '', phone: '', email: '' });
 
   // ─── Effects ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -166,19 +166,37 @@ export default function MobileSeller() {
     if (!newClient.document_id || !newClient.name) return;
     setRegisterLoading(true);
     try {
-      const res = await fetch('/api/clients', { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ ...newClient, address: location ? `GPS: ${location.lat.toFixed(5)}, ${location.lon.toFixed(5)}` : '' }) });
+      const res = await fetch('/api/clients', { 
+        method: 'POST', 
+        headers: { 
+          'Authorization': `Bearer ${token}`, 
+          'Content-Type': 'application/json' 
+        }, 
+        body: JSON.stringify({ 
+          ...newClient, 
+          address: location ? `GPS: ${location.lat?.toFixed(5)}, ${location.lon?.toFixed(5)}` : '' 
+        }) 
+      });
+      
       if (res.ok) {
         setNewClient({ document_id: '', name: '', phone: '', email: '' });
         setShowRegisterClient(false);
         fetchData();
-      } else { const d = await res.json(); alert('Error: ' + (d.error || 'Desconocido')); }
-    } catch { alert('Error de conexión'); }
-    finally { setRegisterLoading(false); }
+      } else {
+        const err = await res.json().catch(() => ({ error: 'Error desconocido' }));
+        alert(`Error: ${err.error}`);
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error de conexión');
+    } finally {
+      setRegisterLoading(false);
+    }
   };
 
   const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(searchProduct.toLowerCase()) ||
-    p.code.toLowerCase().includes(searchProduct.toLowerCase())
+    (p?.name || '').toLowerCase().includes(searchProduct.toLowerCase()) ||
+    (p?.code || '').toLowerCase().includes(searchProduct.toLowerCase())
   );
 
   const pendingOffline = offlineOrders.filter(o => !o.synced).length;
