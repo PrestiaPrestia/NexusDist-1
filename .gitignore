@@ -9,3 +9,6 @@ coverage/
 *.db
 *.db-shm
 *.db-wal
+
+# Local Netlify folder
+.netlify
