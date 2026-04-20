@@ -3,7 +3,6 @@ import { SupabaseService } from "./supabase_service";
 import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import dotenv from 'dotenv';
-import path from 'path';
 
 dotenv.config();
 
@@ -28,10 +27,10 @@ const authenticateToken = async (req: any, res: Response, next: NextFunction) =>
   }
 };
 
-// --- API Routes ---
+const apiRouter = express.Router();
 
 // Auth
-app.post("/api/auth/login", async (req, res) => {
+apiRouter.post("/auth/login", async (req, res) => {
   const { username, password } = req.body;
   try {
     const user = await SupabaseService.getUserByUsername(username);
@@ -54,7 +53,7 @@ app.post("/api/auth/login", async (req, res) => {
 });
 
 // Products
-app.get("/api/products", authenticateToken, async (req, res) => {
+apiRouter.get("/products", authenticateToken, async (req, res) => {
   try {
     const products = await SupabaseService.getProducts();
     res.json(products);
@@ -63,7 +62,7 @@ app.get("/api/products", authenticateToken, async (req, res) => {
   }
 });
 
-app.post("/api/products", authenticateToken, async (req, res) => {
+apiRouter.post("/products", authenticateToken, async (req, res) => {
   try {
     const data = await SupabaseService.addProduct(req.body);
     res.json(data);
@@ -73,7 +72,7 @@ app.post("/api/products", authenticateToken, async (req, res) => {
 });
 
 // Sales
-app.post("/api/sales", authenticateToken, async (req: any, res) => {
+apiRouter.post("/sales", authenticateToken, async (req: any, res) => {
   const { items, client_id, doc_type, currency_code, exchange_rate } = req.body;
   const seller_id = req.user.id;
 
@@ -93,7 +92,7 @@ app.post("/api/sales", authenticateToken, async (req: any, res) => {
   }
 });
 
-app.get("/api/stats", authenticateToken, async (req, res) => {
+apiRouter.get("/stats", authenticateToken, async (req, res) => {
   try {
     const stats = await SupabaseService.getDashboardStats();
     res.json(stats);
@@ -102,7 +101,7 @@ app.get("/api/stats", authenticateToken, async (req, res) => {
   }
 });
 
-app.get("/api/sales/history", authenticateToken, async (req, res) => {
+apiRouter.get("/sales/history", authenticateToken, async (req, res) => {
   try {
     const history = await SupabaseService.getSaleHistory();
     res.json(history);
@@ -111,16 +110,7 @@ app.get("/api/sales/history", authenticateToken, async (req, res) => {
   }
 });
 
-app.get("/api/cashflow", authenticateToken, async (req, res) => {
-  try {
-    const flow = await SupabaseService.getCashFlow();
-    res.json(flow);
-  } catch (e: any) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-app.get("/api/currencies", authenticateToken, async (req, res) => {
+apiRouter.get("/currencies", authenticateToken, async (req, res) => {
   try {
     const currencies = await SupabaseService.getCurrencies();
     res.json(currencies);
@@ -129,7 +119,16 @@ app.get("/api/currencies", authenticateToken, async (req, res) => {
   }
 });
 
-app.post("/api/cashflow", authenticateToken, async (req: any, res) => {
+apiRouter.get("/cashflow", authenticateToken, async (req, res) => {
+  try {
+    const flow = await SupabaseService.getCashFlow();
+    res.json(flow);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+apiRouter.post("/cashflow", authenticateToken, async (req: any, res) => {
   const { type, amount, currency_code, description } = req.body;
   const user_id = req.user.id;
   try {
@@ -139,5 +138,9 @@ app.post("/api/cashflow", authenticateToken, async (req: any, res) => {
     res.status(400).json({ error: e.message });
   }
 });
+
+// Mount the router at both /api (local) and / (serverless)
+app.use("/api", apiRouter);
+app.use("/", apiRouter);
 
 export default app;
