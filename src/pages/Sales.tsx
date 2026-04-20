@@ -16,8 +16,8 @@ import {
   Calculator,
   Package
 } from 'lucide-react';
-import { motion } from 'motion/react';
-import jsPDF from 'jspdf';
+import { motion, AnimatePresence } from 'motion/react';
+import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 export default function Sales() {
@@ -88,8 +88,8 @@ export default function Sales() {
           items: cart,
           doc_type: docType,
           currency_code: selectedCurrency?.code,
-          exchange_rate: 1.0, // Simplified for this demo
-          client_id: 1 // Hardcoded demo client
+          exchange_rate: 1.0, 
+          client_id: 1 
         })
       });
 
@@ -100,38 +100,45 @@ export default function Sales() {
 
       const data = await res.json();
       
-      // Intentar generar PDF pero no bloquear si falla
+      // Pasar copia de los datos actuales para el PDF antes de limpiar el carrito
+      const pdfData = {
+        saleId: data.sale_id,
+        items: [...cart],
+        subtotal,
+        tax,
+        total,
+        docType
+      };
+
       try {
-        generatePDF(data.sale_id);
+        generatePDF(pdfData);
       } catch (pdfError) {
-        console.error('PDF Generation failed:', pdfError);
-        alert('Venta registrada pero hubo un problema al generar el PDF.');
+        console.error('Error generando PDF:', pdfError);
       }
 
+      alert('¡Venta realizada con éxito!');
+      
+      // Limpiar estado
       setCart([]);
-      alert(`Venta realizada con éxito. ID: ${data.sale_id}`);
     } catch (e: any) {
+      console.error('Error en checkout:', e);
       alert(e.message);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const generatePDF = (saleId: number) => {
+  const generatePDF = (data: any) => {
     const doc = new jsPDF();
-    const currentCart = [...cart]; // Snapshop of current cart
-    const currentSubtotal = subtotal;
-    const currentTax = tax;
-    const currentTotal = total;
-
+    
     doc.setFontSize(20);
     doc.text('NexusDist ERP - COMPROBANTE', 20, 20);
     doc.setFontSize(10);
-    doc.text(`ID Venta: ${saleId}`, 20, 30);
-    doc.text(`Tipo: ${docType.toUpperCase()}`, 20, 35);
+    doc.text(`ID Venta: ${data.saleId}`, 20, 30);
+    doc.text(`Tipo: ${data.docType.toUpperCase()}`, 20, 35);
     doc.text(`Fecha: ${new Date().toLocaleString()}`, 20, 40);
 
-    const tableData = currentCart.map(item => [
+    const tableData = data.items.map((item: any) => [
       item.name,
       item.quantity,
       `$${item.unit_price.toFixed(2)}`,
@@ -143,23 +150,22 @@ export default function Sales() {
       body: tableData,
       startY: 50,
       theme: 'grid',
-      headStyles: { fillGray: 20 },
+      headStyles: { fill: [56, 189, 248] }, // Accent color
     });
 
     const finalY = (doc as any).lastAutoTable?.finalY || 100;
-    doc.text(`Subtotal: $${currentSubtotal.toFixed(2)}`, 140, finalY + 10);
-    doc.text(`IGV (18%): $${currentTax.toFixed(2)}`, 140, finalY + 15);
+    doc.text(`Subtotal: $${data.subtotal.toFixed(2)}`, 140, finalY + 10);
+    doc.text(`IGV (18%): $${data.tax.toFixed(2)}`, 140, finalY + 15);
     doc.setFontSize(14);
-    doc.text(`TOTAL: $${currentTotal.toFixed(2)}`, 140, finalY + 25);
+    doc.text(`TOTAL: $${data.total.toFixed(2)}`, 140, finalY + 25);
 
-    doc.save(`Venta_${saleId}.pdf`);
+    doc.save(`Venta_${data.saleId}.pdf`);
   };
 
   const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-160px)] pb-10">
-      {/* Product Selection (Left) */}
       <div className="flex-1 flex flex-col min-w-0 glass-card border-white/10 shadow-2xl overflow-hidden relative">
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent/0 via-accent/50 to-accent/0" />
         <div className="p-6 border-b border-white/5 bg-white/5 space-y-6">
@@ -188,7 +194,7 @@ export default function Sales() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim" size={18} />
             <input 
               type="text" 
-              placeholder="Buscar por código, nombre o categoría..."
+              placeholder="Buscar por código o nombre..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3.5 bg-black/30 border border-white/10 rounded-2xl focus:ring-1 focus:ring-accent outline-none font-medium text-sm text-white placeholder:text-text-dim/40 transition-all shadow-inner"
@@ -214,8 +220,8 @@ export default function Sales() {
                 </span>
                 <p className="font-bold text-white group-hover:text-accent transition-colors leading-snug min-h-[40px]">{p.name}</p>
                 <div className="flex items-center gap-2 mt-2">
-                   <div className={`w-1.5 h-1.5 rounded-full ${p.total_stock < p.min_stock ? 'bg-red-400 animate-pulse' : 'bg-green-400'}`} />
-                   <p className="text-[10px] font-black text-text-dim uppercase tracking-tighter">Stock: {p.total_stock} {p.unit}</p>
+                   <div className={`w-1.5 h-1.5 rounded-full ${p.total_stock < p.min_stock ? 'bg-red-400' : 'bg-green-400'}`} />
+                   <p className="text-[10px] font-black text-text-dim uppercase tracking-tighter">Stock: {p.total_stock}</p>
                 </div>
               </div>
               <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between relative z-10">
@@ -229,7 +235,6 @@ export default function Sales() {
         </div>
       </div>
 
-      {/* Cart & Summary (Right) */}
       <div className="lg:w-96 flex flex-col glass-card border-white/10 shadow-2xl overflow-hidden shrink-0 relative">
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent/0 via-accent/50 to-accent/0" />
         <div className="p-6 border-b border-white/10 bg-white/10 flex items-center justify-between">
@@ -239,88 +244,77 @@ export default function Sales() {
             </div>
             <span className="font-black text-white uppercase tracking-widest text-sm">Carrito</span>
           </div>
-          <span className="bg-white/10 border border-white/10 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase">{cart.length} Artículos</span>
+          <span className="bg-white/10 border border-white/10 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase">{cart.length}</span>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-          {cart.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center p-10 text-center">
-              <div className="w-16 h-16 rounded-full border-2 border-dashed border-white/10 flex items-center justify-center mb-6 opacity-30">
-                 <ShoppingCart size={28} className="text-text-dim" />
+          <AnimatePresence>
+            {cart.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center p-10 text-center">
+                <div className="w-16 h-16 rounded-full border-2 border-dashed border-white/10 flex items-center justify-center mb-6 opacity-30">
+                   <ShoppingCart size={28} className="text-text-dim" />
+                </div>
+                <p className="text-[10px] font-black text-text-dim uppercase tracking-[0.2em] leading-relaxed">Carrito Vacío</p>
               </div>
-              <p className="text-[10px] font-black text-text-dim uppercase tracking-[0.2em] leading-relaxed">Caja Registradora<br/>Vacía</p>
-            </div>
-          ) : (
-            cart.map(item => (
-              <motion.div 
-                layout
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                key={item.product_id} 
-                className="flex items-start gap-3 p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-white text-sm truncate">{item.name}</p>
-                  <p className="text-[10px] font-black text-accent uppercase tracking-tighter mt-1">${item.unit_price.toFixed(2)} / un</p>
-                </div>
-                <div className="flex flex-col items-end gap-3">
-                  <div className="flex items-center bg-black/40 border border-white/10 rounded-xl p-1 shadow-inner">
-                    <button onClick={() => updateQuantity(item.product_id, -1)} className="w-6 h-6 flex items-center justify-center text-text-dim hover:text-white transition-colors">
-                       <Minus size={14} strokeWidth={3} />
-                    </button>
-                    <span className="w-8 text-center text-xs font-black text-white">{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item.product_id, 1)} className="w-6 h-6 flex items-center justify-center text-text-dim hover:text-white transition-colors">
-                       <Plus size={14} strokeWidth={3} />
-                    </button>
-                  </div>
-                  <p className="text-[10px] font-black text-white/50 group-hover:text-white transition-colors tracking-tight">
-                    Total: <span className="text-white">${(item.quantity * item.unit_price).toFixed(2)}</span>
-                  </p>
-                </div>
-                <button 
-                  onClick={() => removeFromCart(item.product_id)} 
-                  className="p-1.5 text-text-dim hover:text-red-400 transition-all opacity-0 group-hover:opacity-100"
+            ) : (
+              cart.map(item => (
+                <motion.div 
+                  key={item.product_id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="flex items-start gap-3 p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group"
                 >
-                  <Trash2 size={16} />
-                </button>
-              </motion.div>
-            ))
-          )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-white text-sm truncate">{item.name}</p>
+                    <p className="text-[10px] font-black text-accent uppercase mt-1">${item.unit_price.toFixed(2)}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-3">
+                    <div className="flex items-center bg-black/40 border border-white/10 rounded-xl p-1">
+                      <button onClick={() => updateQuantity(item.product_id, -1)} className="w-6 h-6 flex items-center justify-center text-text-dim hover:text-white">
+                         <Minus size={14} strokeWidth={3} />
+                      </button>
+                      <span className="w-8 text-center text-xs font-black text-white">{item.quantity}</span>
+                      <button onClick={() => updateQuantity(item.product_id, 1)} className="w-6 h-6 flex items-center justify-center text-text-dim hover:text-white">
+                         <Plus size={14} strokeWidth={3} />
+                      </button>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => removeFromCart(item.product_id)} 
+                    className="p-1.5 text-text-dim hover:text-red-400 ml-2"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </motion.div>
+              ))
+            )}
+          </AnimatePresence>
         </div>
 
         <div className="p-8 bg-black/20 border-t border-white/10 space-y-6">
-          <div className="grid grid-cols-2 p-1.5 bg-black/40 border border-white/10 rounded-2xl shadow-inner">
+          <div className="grid grid-cols-2 p-1.5 bg-black/40 border border-white/10 rounded-2xl">
              <button 
                onClick={() => setDocType('boleta')}
-               className={`py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${docType === 'boleta' ? 'bg-white/15 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)]' : 'text-text-dim'}`}
+               className={`py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${docType === 'boleta' ? 'bg-white/15 text-white' : 'text-text-dim'}`}
              >Boleta</button>
              <button 
                onClick={() => setDocType('factura')}
-               className={`py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${docType === 'factura' ? 'bg-white/15 text-white shadow-[0_0_15px_rgba(255,255,255,0.05)]' : 'text-text-dim'}`}
+               className={`py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${docType === 'factura' ? 'bg-white/15 text-white' : 'text-text-dim'}`}
              >Factura</button>
           </div>
 
           <div className="space-y-4">
             <div className="flex justify-between items-baseline">
-              <span className="text-[9px] font-black text-text-dim uppercase tracking-[0.2em]">Subtotal Bruto</span>
-              <span className="text-xs font-black text-white tracking-widest">${subtotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between items-baseline">
-              <span className="text-[9px] font-black text-text-dim uppercase tracking-[0.2em]">IGV (18%)</span>
-              <span className="text-xs font-black text-white tracking-widest">${tax.toFixed(2)}</span>
+              <span className="text-[9px] font-black text-text-dim uppercase">Subtotal</span>
+              <span className="text-xs font-black text-white">${subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center pt-5 border-t border-white/10 mt-2">
-              <span className="text-xs font-black text-white uppercase tracking-[0.3em]">Total de Venta</span>
-              <div className="flex flex-col items-end">
-                <span className="text-3xl font-black text-accent tracking-tighter drop-shadow-[0_0_15px_rgba(56,189,248,0.4)]">
-                   ${total.toFixed(2)}
-                </span>
-                {selectedCurrency?.code !== 'USD' && (
-                  <span className="text-[10px] font-bold text-text-dim uppercase tracking-tighter mt-1">
-                    ~ {(total * 3.75).toFixed(2)} {selectedCurrency?.code}
-                  </span>
-                )}
-              </div>
+              <span className="text-xs font-black text-white uppercase">Total</span>
+              <span className="text-3xl font-black text-accent tracking-tighter shadow-accent/20">
+                 ${total.toFixed(2)}
+              </span>
             </div>
           </div>
 
@@ -330,7 +324,7 @@ export default function Sales() {
             className={`w-full py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-[11px] shadow-2xl transition-all active:scale-95 flex items-center justify-center gap-3 ${
               cart.length === 0 || isProcessing 
               ? 'bg-text-dim/50 cursor-not-allowed text-bg-dark/50' 
-              : 'bg-accent text-bg-dark shadow-accent/20 hover:brightness-110'
+              : 'bg-accent text-bg-dark hover:brightness-110'
             }`}
           >
             {isProcessing ? 'Procesando...' : (
