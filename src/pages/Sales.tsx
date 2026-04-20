@@ -8,9 +8,9 @@ import {
   Minus, 
   CreditCard,
   Search,
-  Package
+  Package,
+  CheckCircle2
 } from 'lucide-react';
-import { motion } from 'motion/react';
 
 export default function Sales() {
   const { token } = useAuth();
@@ -35,9 +35,12 @@ export default function Sales() {
       ]);
       const pData = await pRes.json();
       const cData = await cRes.json();
-      setProducts(pData);
-      setCurrencies(cData.currencies);
-      setSelectedCurrency(cData.currencies.find((c: any) => c.is_main) || cData.currencies[0]);
+      
+      setProducts(Array.isArray(pData) ? pData : []);
+      if (cData && cData.currencies) {
+        setCurrencies(cData.currencies);
+        setSelectedCurrency(cData.currencies.find((c: any) => c.is_main) || cData.currencies[0]);
+      }
     } catch (e) {
       console.error('Error fetching data:', e);
     }
@@ -49,7 +52,8 @@ export default function Sales() {
       if (existing) {
         return prev.map(i => i.product_id === product.id ? { ...i, quantity: i.quantity + 1 } : i);
       }
-      return [...prev, { product_id: product.id, name: product.name, quantity: 1, unit_price: product.price }];
+      const price = typeof product.price === 'number' ? product.price : 0;
+      return [...prev, { product_id: product.id, name: product.name, quantity: 1, unit_price: price }];
     });
   };
 
@@ -62,7 +66,7 @@ export default function Sales() {
     }).filter(i => i.quantity > 0));
   };
 
-  const subtotal = cart.reduce((acc, i) => acc + (i.quantity * i.unit_price), 0);
+  const subtotal = cart.reduce((acc, i) => acc + (i.quantity * (i.unit_price || 0)), 0);
   const tax = subtotal * 0.18;
   const total = subtotal + tax;
 
@@ -71,19 +75,21 @@ export default function Sales() {
     
     setIsProcessing(true);
     try {
+      const bodyData = {
+        items: cart,
+        doc_type: docType,
+        currency_code: selectedCurrency?.code || 'USD',
+        exchange_rate: 1.0, 
+        client_id: 1 
+      };
+
       const res = await fetch('/api/sales', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          items: cart,
-          doc_type: docType,
-          currency_code: selectedCurrency?.code,
-          exchange_rate: 1.0, 
-          client_id: 1 
-        })
+        body: JSON.stringify(bodyData)
       });
 
       if (!res.ok) {
@@ -91,39 +97,37 @@ export default function Sales() {
           throw new Error(errorData.error || 'Error al procesar venta');
       }
 
-      // IMPORTANTE: Primero limpiar estados y luego mostrar éxito
+      // IMPORTANTE: Limpiar estados de forma segura
       setCart([]);
+      setSearchTerm('');
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
 
     } catch (e: any) {
       console.error('Error en checkout:', e);
-      alert(e.message);
+      alert('Error: ' + e.message);
     } finally {
       setIsProcessing(false);
     }
   };
 
   const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.code.toLowerCase().includes(searchTerm.toLowerCase())
+    (p.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (p.code || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-120px)]">
+    <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-120px)] animate-in fade-in duration-500">
       {/* Catalogo (Izquierda) */}
       <div className="flex-1 flex flex-col min-w-0 glass p-1 border-white/5 rounded-3xl overflow-hidden">
         <div className="p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-white tracking-tight">Ventas</h1>
             {showSuccess && (
-              <motion.div 
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-green-500/20 text-green-400 px-4 py-1.5 rounded-full text-xs font-bold border border-green-500/30"
-              >
-                ¡Venta completada!
-              </motion.div>
+              <div className="bg-green-500/20 text-green-400 px-4 py-1.5 rounded-full text-xs font-bold border border-green-500/30 flex items-center gap-2">
+                <CheckCircle2 size={14} />
+                ¡Venta completada con éxito!
+              </div>
             )}
           </div>
           
@@ -147,13 +151,19 @@ export default function Sales() {
               className="group p-4 bg-white/5 border border-white/10 rounded-2xl hover:border-accent/40 text-left transition-all relative overflow-hidden"
             >
               <p className="font-bold text-white mb-1">{p.name}</p>
-              <p className="text-[10px] text-text-dim uppercase font-bold">{p.category_name}</p>
+              <p className="text-[10px] text-text-dim uppercase font-bold">{p.category_name || 'Sin Categoría'}</p>
               <div className="mt-4 flex items-center justify-between">
-                <span className="text-xl font-black text-accent italic">${p.price.toFixed(2)}</span>
+                <span className="text-xl font-black text-accent italic">${(p.price || 0).toFixed(2)}</span>
                 <Plus size={16} className="text-text-dim group-hover:text-white" />
               </div>
             </button>
           ))}
+          {filteredProducts.length === 0 && (
+            <div className="col-span-full py-20 text-center opacity-20">
+               <Package size={48} className="mx-auto mb-4" />
+               <p className="text-xs font-black uppercase">No se encontraron productos</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -169,7 +179,7 @@ export default function Sales() {
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
           {cart.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center opacity-20">
+            <div className="h-full flex flex-col items-center justify-center opacity-20 text-white">
                <ShoppingCart size={48} className="mb-4" />
                <p className="text-xs font-bold uppercase">Carrito Vacío</p>
             </div>
@@ -178,7 +188,7 @@ export default function Sales() {
               <div key={item.product_id} className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-white text-sm truncate">{item.name}</p>
-                  <p className="text-[10px] text-accent">${item.unit_price.toFixed(2)}</p>
+                  <p className="text-[10px] text-accent">${(item.unit_price || 0).toFixed(2)}</p>
                 </div>
                 <div className="flex items-center bg-black/20 rounded-lg p-1">
                   <button onClick={() => updateQuantity(item.product_id, -1)} className="w-6 h-6 flex items-center justify-center text-text-dim hover:text-white">
@@ -197,11 +207,11 @@ export default function Sales() {
         <div className="p-6 bg-white/5 border-t border-white/10 space-y-4">
           <div className="flex justify-between text-sm">
             <span className="text-text-dim">Subtotal</span>
-            <span className="text-white font-bold">${subtotal.toFixed(2)}</span>
+            <span className="text-white font-bold">${(subtotal || 0).toFixed(2)}</span>
           </div>
           <div className="flex justify-between items-center pt-4 border-t border-white/10">
             <span className="text-white font-bold uppercase text-xs">Total</span>
-            <span className="text-2xl font-black text-accent">${total.toFixed(2)}</span>
+            <span className="text-2xl font-black text-accent">${(total || 0).toFixed(2)}</span>
           </div>
 
           <button 
