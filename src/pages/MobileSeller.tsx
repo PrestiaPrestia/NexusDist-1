@@ -221,11 +221,11 @@ export default function MobileSeller() {
         <div className="px-6 py-3 flex items-center justify-between shrink-0">
           <div>
             <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest">NexusDist Móvil</p>
-            <h2 className="text-lg font-black text-white">Hola, {(user?.full_name || 'Vendedor').split(' ')[0]} 👋</h2>
+            <h2 className="text-lg font-black text-white">Hola, {(user?.full_name || 'Vendedor').split?.(' ')[0] || 'Vendedor'} 👋</h2>
           </div>
           <div className="flex items-center gap-1.5 text-[9px] bg-black/50 border border-white/10 px-3 py-1.5 rounded-full text-white/60 font-bold">
             <MapPin size={9} className="text-accent" />
-            {location ? `${location.lat.toFixed(3)}°` : 'GPS...'}
+            {location ? `${location.lat?.toFixed?.(3) || '0'}°` : 'GPS...'}
           </div>
         </div>
 
@@ -496,7 +496,7 @@ export default function MobileSeller() {
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
                   <p className="text-[8px] text-white/40 uppercase font-bold">Ingresos</p>
-                  <p className="text-2xl font-black text-accent">${sales.reduce((a, s) => a + Number(s.total), 0).toFixed(0)}</p>
+                  <p className="text-2xl font-black text-accent">${(sales || []).reduce((a, s) => a + Number(s?.total || 0), 0).toFixed?.(0) || '0'}</p>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
                   <p className="text-[8px] text-white/40 uppercase font-bold">Clientes</p>
