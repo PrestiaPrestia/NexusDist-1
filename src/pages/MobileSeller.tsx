@@ -84,13 +84,20 @@ export default function MobileSeller() {
       const [pRes, cRes, sRes] = await Promise.all([
         fetch('/api/products', { headers }),
         fetch('/api/clients', { headers }),
-        fetch('/api/sales', { headers }),
+        fetch('/api/sales/history', { headers }),
       ]);
-      const [pData, cData, sData] = await Promise.all([pRes.json(), cRes.json(), sRes.json()]);
+      
+      let pData = [], cData = [], sData = [];
+      if (pRes.ok) pData = await pRes.json();
+      if (cRes.ok) cData = await cRes.json();
+      if (sRes.ok) sData = await sRes.json();
+
       setProducts(Array.isArray(pData) ? pData : []);
       setClients(Array.isArray(cData) ? cData : []);
       setSales(Array.isArray(sData) ? sData.slice(0, 20) : []);
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      console.error('Fetch error:', e);
+    }
     finally { setLoading(false); }
   };
 
@@ -427,7 +434,7 @@ export default function MobileSeller() {
               {showRegisterClient && (
                 <div className="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-3">
                   <p className="text-[9px] text-accent uppercase font-black tracking-widest">Registrar nuevo cliente</p>
-                  {location && <p className="text-[9px] text-white/30 flex items-center gap-1"><MapPin size={9} className="text-accent" />GPS capturado: {location.lat.toFixed(4)}, {location.lon.toFixed(4)}</p>}
+                  {location && <p className="text-[9px] text-white/30 flex items-center gap-1"><MapPin size={9} className="text-accent" />GPS capturado: {location.lat?.toFixed(4)}, {location.lon?.toFixed(4)}</p>}
                   <input placeholder="RUC / Cédula *" value={newClient.document_id} onChange={e => setNewClient(p => ({...p, document_id: e.target.value}))}
                     className="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-accent/40" />
                   <input placeholder="Nombre o Razón Social *" value={newClient.name} onChange={e => setNewClient(p => ({...p, name: e.target.value}))}
