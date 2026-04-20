@@ -173,6 +173,21 @@ async function startServer() {
     res.json(flow);
   });
 
+  app.post("/api/cashflow", authenticateToken, (req: any, res) => {
+    const { type, amount, currency_code, description } = req.body;
+    const user_id = req.user.id;
+
+    try {
+      db.prepare(`
+        INSERT INTO cash_flow (type, amount, currency_code, description, user_id)
+        VALUES (?, ?, ?, ?, ?)
+      `).run(type, amount, currency_code, description, user_id);
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
   // Currencies
   app.get("/api/currencies", authenticateToken, (req, res) => {
     const currencies = db.prepare('SELECT * FROM currencies').all();

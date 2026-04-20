@@ -27,29 +27,79 @@ export default function Financial() {
   const [flow, setFlow] = useState<CashFlowItem[]>([]);
   const [totalIncome, setTotalIncome] = useState(0);
   const [totalExpenses, setTotalExpenses] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    type: 'expense' as 'income' | 'expense',
+    amount: '',
+    description: '',
+    currency_code: 'USD'
+  });
 
-  useEffect(() => {
+  const fetchData = () => {
     fetch('/api/cashflow', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     .then(res => res.json())
     .then(data => {
-      setFlow(data);
-      const inc = data.filter((i: any) => i.type === 'income').reduce((acc: number, i: any) => acc + i.amount, 0);
-      const exp = data.filter((i: any) => i.type === 'expense').reduce((acc: number, i: any) => acc + i.amount, 0);
-      setTotalIncome(inc);
-      setTotalExpenses(exp);
-    });
+      if (Array.isArray(data)) {
+        setFlow(data);
+        const inc = data.filter((i: any) => i.type === 'income').reduce((acc: number, i: any) => acc + i.amount, 0);
+        const exp = data.filter((i: any) => i.type === 'expense').reduce((acc: number, i: any) => acc + i.amount, 0);
+        setTotalIncome(inc);
+        setTotalExpenses(exp);
+      }
+    })
+    .catch(err => console.error('Error fetching cashflow:', err));
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [token]);
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/cashflow', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          ...formData,
+          amount: parseFloat(formData.amount)
+        })
+      });
+
+      if (res.ok) {
+        setIsModalOpen(false);
+        setFormData({ type: 'expense', amount: '', description: '', currency_code: 'USD' });
+        fetchData();
+      } else {
+        const error = await res.json();
+        alert(error.error || 'Error al guardar operación');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error de conexión');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-10 pb-20 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight">Análisis Financiero</h1>
           <p className="text-text-dim font-medium">Control de ingresos y egresos diarios de la distribuidora.</p>
         </div>
-        <button className="inline-flex items-center gap-2 bg-accent text-bg-dark px-5 py-3 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] shadow-lg shadow-accent/20 transition-all hover:scale-[1.02]">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="inline-flex items-center gap-2 bg-accent text-bg-dark px-5 py-3 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] shadow-lg shadow-accent/20 transition-all hover:scale-[1.02] active:scale-95"
+        >
           <Plus size={18} strokeWidth={3} />
           Nueva Operación
         </button>
@@ -66,7 +116,7 @@ export default function Financial() {
              </div>
              <p className="text-[10px] font-black text-text-dim uppercase tracking-widest">Ingresos Totales</p>
            </div>
-           <h3 className="text-3xl font-black text-white relative z-10">${totalIncome.toLocaleString()}</h3>
+           <h3 className="text-3xl font-black text-white relative z-10">${totalIncome.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
         </div>
         
         <div className="glass-card p-6 border-white/10 group overflow-hidden relative">
@@ -79,7 +129,7 @@ export default function Financial() {
              </div>
              <p className="text-[10px] font-black text-text-dim uppercase tracking-widest">Egresos Totales</p>
            </div>
-           <h3 className="text-3xl font-black text-white relative z-10">${totalExpenses.toLocaleString()}</h3>
+           <h3 className="text-3xl font-black text-white relative z-10">${totalExpenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
         </div>
 
         <div className="bg-accent p-6 rounded-2xl shadow-xl shadow-accent/20 text-bg-dark group overflow-hidden relative">
@@ -93,7 +143,7 @@ export default function Financial() {
              <p className="text-[10px] font-black text-bg-dark/60 uppercase tracking-widest">Saldo en Caja</p>
            </div>
            <div className="flex items-baseline gap-2 relative z-10">
-             <h3 className="text-3xl font-black">${(totalIncome - totalExpenses).toLocaleString()}</h3>
+             <h3 className="text-3xl font-black">${(totalIncome - totalExpenses).toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
              <span className="text-xs font-black opacity-60">USD</span>
            </div>
         </div>
@@ -137,6 +187,77 @@ export default function Financial() {
           )}
         </div>
       </div>
+
+      {/* Modal Nueva Operación */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="glass-card w-full max-w-md p-8 border-white/10 shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200">
+             <div className="flex items-center justify-between mb-8">
+                <h2 className="text-xl font-bold text-white uppercase tracking-tighter">Nueva Operación</h2>
+                <button onClick={() => setIsModalOpen(false)} className="text-text-dim hover:text-white">
+                  <Plus size={24} className="rotate-45" />
+                </button>
+             </div>
+
+             <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="flex p-1 bg-black/40 rounded-xl gap-1">
+                   <button 
+                    type="button"
+                    onClick={() => setFormData({...formData, type: 'income'})}
+                    className={`flex-1 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${formData.type === 'income' ? 'bg-green-500 text-bg-dark' : 'text-text-dim hover:text-white'}`}
+                   >
+                     Ingreso
+                   </button>
+                   <button 
+                    type="button"
+                    onClick={() => setFormData({...formData, type: 'expense'})}
+                    className={`flex-1 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${formData.type === 'expense' ? 'bg-red-500 text-bg-dark' : 'text-text-dim hover:text-white'}`}
+                   >
+                     Egreso
+                   </button>
+                </div>
+
+                <div className="space-y-2">
+                   <label className="text-[10px] font-black text-text-dim uppercase tracking-widest">Monto (USD)</label>
+                   <div className="relative">
+                      <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-accent" size={18} />
+                      <input 
+                        required
+                        type="number"
+                        step="0.01"
+                        value={formData.amount}
+                        onChange={e => setFormData({...formData, amount: e.target.value})}
+                        className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:ring-1 focus:ring-accent"
+                        placeholder="0.00"
+                      />
+                   </div>
+                </div>
+
+                <div className="space-y-2">
+                   <label className="text-[10px] font-black text-text-dim uppercase tracking-widest">Descripción</label>
+                   <textarea 
+                    required
+                    value={formData.description}
+                    onChange={e => setFormData({...formData, description: e.target.value})}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:ring-1 focus:ring-accent min-h-[100px]"
+                    placeholder="Ej. Pago a proveedor, Venta menor, etc."
+                   />
+                </div>
+
+                <button 
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full py-4 bg-accent text-bg-dark rounded-xl font-black uppercase tracking-widest text-xs shadow-lg shadow-accent/20 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50"
+                >
+                  {isLoading ? 'Registrando...' : 'Registrar Operación'}
+                </button>
+             </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
     </div>
   );
 }
