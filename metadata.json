@@ -1,0 +1,13 @@
+{
+  "name": "NexusDist ERP",
+  "description": "Comprehensive business management system for distributors featuring sales, inventory, CRM, electronic invoicing, and mobile seller support.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "inventory-management",
+    "pos-system",
+    "real-time-collaboration",
+    "multi-currency"
+  ]
+}
