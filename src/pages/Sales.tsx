@@ -37,9 +37,11 @@ export default function Sales() {
       const cData = await cRes.json();
       
       setProducts(Array.isArray(pData) ? pData : []);
-      if (cData && cData.currencies) {
-        setCurrencies(cData.currencies);
-        setSelectedCurrency(cData.currencies.find((c: any) => c.is_main) || cData.currencies[0]);
+      
+      // cData ahora es un array directo de Supabase
+      if (Array.isArray(cData)) {
+        setCurrencies(cData);
+        setSelectedCurrency(cData.find((c: any) => c.is_main) || cData[0] || null);
       }
     } catch (e) {
       console.error('Error fetching data:', e);
