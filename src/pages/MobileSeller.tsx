@@ -196,7 +196,7 @@ export default function MobileSeller() {
         <div className="px-6 py-3 flex items-center justify-between shrink-0">
           <div>
             <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest">NexusDist Móvil</p>
-            <h2 className="text-lg font-black text-white">Hola, {user?.full_name?.split(' ')[0]} 👋</h2>
+            <h2 className="text-lg font-black text-white">Hola, {(user?.full_name || 'Vendedor').split(' ')[0]} 👋</h2>
           </div>
           <div className="flex items-center gap-1.5 text-[9px] bg-black/50 border border-white/10 px-3 py-1.5 rounded-full text-white/60 font-bold">
             <MapPin size={9} className="text-accent" />
@@ -247,7 +247,7 @@ export default function MobileSeller() {
                 {selectedClient ? (
                   <div className="flex items-center justify-between p-3 bg-accent/10 border border-accent/30 rounded-2xl">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent font-black text-sm">{selectedClient.name[0]}</div>
+                      <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent font-black text-sm">{(selectedClient?.name || '?')[0]}</div>
                       <div>
                         <p className="text-xs font-bold text-white">{selectedClient.name}</p>
                         <p className="text-[9px] text-white/40">{selectedClient.document_id}</p>
@@ -448,7 +448,7 @@ export default function MobileSeller() {
                 {clients.map(c => (
                   <button key={c.id} onClick={() => { setSelectedClient(c); setTab('pos'); }}
                     className="w-full flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-2xl text-left hover:border-accent/30 transition-all">
-                    <div className="w-9 h-9 rounded-full bg-accent/15 flex items-center justify-center text-accent font-black text-sm shrink-0">{c.name[0]}</div>
+                    <div className="w-9 h-9 rounded-full bg-accent/15 flex items-center justify-center text-accent font-black text-sm shrink-0">{(c?.name || '?')[0]}</div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-white truncate">{c.name}</p>
                       <p className="text-[9px] text-white/40">{c.document_id} {c.phone ? `• ${c.phone}` : ''}</p>
