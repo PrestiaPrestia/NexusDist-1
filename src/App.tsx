@@ -74,27 +74,27 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     <div className="flex h-screen overflow-hidden">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-52 glass border-r-0 z-50 shrink-0">
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-10">
+        <div className="p-6 pb-2">
+          <div className="flex items-center gap-3 mb-6">
             <div className="p-1.5 bg-accent/20 rounded-lg text-accent border border-accent/30 shadow-[0_0_15px_rgba(56,189,248,0.2)]">
               <Building size={20} />
             </div>
             <h1 className="text-lg font-extrabold tracking-tight text-accent uppercase">NexusDist</h1>
           </div>
-          
-          <nav className="space-y-1">
-            <SidebarLink to="/" icon={LayoutDashboard}>Panel Principal</SidebarLink>
-            <SidebarLink to="/inventory" icon={Package}>Inventario</SidebarLink>
-            <SidebarLink to="/sales" icon={ShoppingCart}>Nueva Venta</SidebarLink>
-            <SidebarLink to="/clients" icon={Users}>Clientes</SidebarLink>
-            <SidebarLink to="/history" icon={History}>Historial</SidebarLink>
-            <SidebarLink to="/reports" icon={TrendingUp}>Caja y Reportes</SidebarLink>
-            <SidebarLink to="/mobile" icon={Smartphone}>Venta Móvil</SidebarLink>
-            <div className="pt-2">
-              <SidebarLink to="/settings" icon={Settings}>Configuración</SidebarLink>
-            </div>
-          </nav>
         </div>
+        
+        <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar pb-4">
+          <SidebarLink to="/" icon={LayoutDashboard}>Panel Principal</SidebarLink>
+          <SidebarLink to="/inventory" icon={Package}>Inventario</SidebarLink>
+          <SidebarLink to="/sales" icon={ShoppingCart}>Nueva Venta</SidebarLink>
+          <SidebarLink to="/clients" icon={Users}>Clientes</SidebarLink>
+          <SidebarLink to="/history" icon={History}>Historial</SidebarLink>
+          <SidebarLink to="/reports" icon={TrendingUp}>Caja y Reportes</SidebarLink>
+          <SidebarLink to="/mobile" icon={Smartphone}>Venta Móvil</SidebarLink>
+          <div className="pt-4 mt-4 border-t border-white/5">
+            <SidebarLink to="/settings" icon={Settings}>Ajustes del Sistema</SidebarLink>
+          </div>
+        </nav>
 
         <div className="mt-auto p-4 border-t border-glass-border">
           <div className="flex items-center gap-3 mb-4 px-2">
@@ -153,7 +153,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 <SidebarLink to="/inventory" icon={Package}>Inventario</SidebarLink>
                 <SidebarLink to="/sales" icon={ShoppingCart}>Nueva Venta</SidebarLink>
                 <SidebarLink to="/clients" icon={Users}>Clientes</SidebarLink>
-                <SidebarLink to="/settings" icon={Settings}>Configuración</SidebarLink>
+                <SidebarLink to="/settings" icon={Settings}>Ajustes del Sistema</SidebarLink>
                 <SidebarLink to="/mobile" icon={Smartphone}>Venta Móvil</SidebarLink>
               </nav>
             </div>
