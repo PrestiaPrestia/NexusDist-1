@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 export default function Sales() {
   const { token } = useAuth();
@@ -93,10 +93,21 @@ export default function Sales() {
         })
       });
 
-      if (!res.ok) throw new Error('Error al procesar venta');
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Error al procesar venta');
+      }
+
       const data = await res.json();
       
-      generatePDF(data.sale_id);
+      // Intentar generar PDF pero no bloquear si falla
+      try {
+        generatePDF(data.sale_id);
+      } catch (pdfError) {
+        console.error('PDF Generation failed:', pdfError);
+        alert('Venta registrada pero hubo un problema al generar el PDF.');
+      }
+
       setCart([]);
       alert(`Venta realizada con éxito. ID: ${data.sale_id}`);
     } catch (e: any) {
@@ -107,7 +118,12 @@ export default function Sales() {
   };
 
   const generatePDF = (saleId: number) => {
-    const doc = new jsPDF() as any;
+    const doc = new jsPDF();
+    const currentCart = [...cart]; // Snapshop of current cart
+    const currentSubtotal = subtotal;
+    const currentTax = tax;
+    const currentTotal = total;
+
     doc.setFontSize(20);
     doc.text('NexusDist ERP - COMPROBANTE', 20, 20);
     doc.setFontSize(10);
@@ -115,24 +131,26 @@ export default function Sales() {
     doc.text(`Tipo: ${docType.toUpperCase()}`, 20, 35);
     doc.text(`Fecha: ${new Date().toLocaleString()}`, 20, 40);
 
-    const tableData = cart.map(item => [
+    const tableData = currentCart.map(item => [
       item.name,
       item.quantity,
       `$${item.unit_price.toFixed(2)}`,
       `$${(item.quantity * item.unit_price).toFixed(2)}`
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       head: [['Producto', 'Cant.', 'Precio Unit.', 'Subtotal']],
       body: tableData,
       startY: 50,
+      theme: 'grid',
+      headStyles: { fillGray: 20 },
     });
 
-    const finalY = doc.lastAutoTable.finalY + 10;
-    doc.text(`Subtotal: $${subtotal.toFixed(2)}`, 140, finalY);
-    doc.text(`IGV (18%): $${tax.toFixed(2)}`, 140, finalY + 5);
+    const finalY = (doc as any).lastAutoTable?.finalY || 100;
+    doc.text(`Subtotal: $${currentSubtotal.toFixed(2)}`, 140, finalY + 10);
+    doc.text(`IGV (18%): $${currentTax.toFixed(2)}`, 140, finalY + 15);
     doc.setFontSize(14);
-    doc.text(`TOTAL: $${total.toFixed(2)}`, 140, finalY + 15);
+    doc.text(`TOTAL: $${currentTotal.toFixed(2)}`, 140, finalY + 25);
 
     doc.save(`Venta_${saleId}.pdf`);
   };
