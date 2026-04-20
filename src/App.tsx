@@ -13,9 +13,9 @@ import {
   X,
   CreditCard,
   Building,
-  Smartphone
+  Smartphone,
+  Shield
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
 import { User } from './types';
 
 // Auth State
@@ -130,41 +130,32 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         </div>
 
         {/* Mobile Sidebar Overlay */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <>
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="fixed inset-0 bg-black/50 z-50 lg:hidden"
-              />
-              <motion.aside 
-                initial={{ x: '-100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '-100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="fixed top-0 left-0 bottom-0 w-3/4 max-w-sm bg-white z-50 lg:hidden p-6"
-              >
-                <div className="flex items-center justify-between mb-8">
-                  <h1 className="text-xl font-bold">NexusDist</h1>
-                  <button onClick={() => setIsMobileMenuOpen(false)} className="p-2">
-                    <X size={24} />
-                  </button>
-                </div>
-                <nav className="space-y-1" onClick={() => setIsMobileMenuOpen(false)}>
-                  <SidebarLink to="/" icon={LayoutDashboard}>Panel Principal</SidebarLink>
-                  <SidebarLink to="/inventory" icon={Package}>Inventario</SidebarLink>
-                  <SidebarLink to="/sales" icon={ShoppingCart}>Nueva Venta</SidebarLink>
-                  <SidebarLink to="/clients" icon={Users}>Clientes</SidebarLink>
-                  <SidebarLink to="/users" icon={Shield}>Usuarios</SidebarLink>
-                  <SidebarLink to="/mobile" icon={Smartphone}>Venta Móvil</SidebarLink>
-                </nav>
-              </motion.aside>
-            </>
-          )}
-        </AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            <div 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 bg-black/50 z-50 lg:hidden"
+            />
+            <div 
+              className="fixed top-0 left-0 bottom-0 w-3/4 max-w-sm bg-bg-dark z-50 lg:hidden p-6 border-r border-white/10"
+            >
+              <div className="flex items-center justify-between mb-8">
+                <h1 className="text-xl font-bold text-accent">NexusDist</h1>
+                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-white">
+                  <X size={24} />
+                </button>
+              </div>
+              <nav className="space-y-1" onClick={() => setIsMobileMenuOpen(false)}>
+                <SidebarLink to="/" icon={LayoutDashboard}>Panel Principal</SidebarLink>
+                <SidebarLink to="/inventory" icon={Package}>Inventario</SidebarLink>
+                <SidebarLink to="/sales" icon={ShoppingCart}>Nueva Venta</SidebarLink>
+                <SidebarLink to="/clients" icon={Users}>Clientes</SidebarLink>
+                <SidebarLink to="/users" icon={Shield}>Usuarios</SidebarLink>
+                <SidebarLink to="/mobile" icon={Smartphone}>Venta Móvil</SidebarLink>
+              </nav>
+            </div>
+          </>
+        )}
       </main>
     </div>
   );
