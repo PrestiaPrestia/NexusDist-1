@@ -20,6 +20,19 @@ export default function Inventory() {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Form State
+  const [formData, setFormData] = useState({
+    code: '',
+    name: '',
+    category_id: 1, // Defaulting to one of the seeded categories
+    price: '',
+    min_stock: '5',
+    unit: 'unidad'
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -35,6 +48,36 @@ export default function Inventory() {
     setIsRefreshing(false);
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          ...formData,
+          price: parseFloat(formData.price),
+          min_stock: parseInt(formData.min_stock),
+          category_id: parseInt(formData.category_id.toString())
+        })
+      });
+
+      if (res.ok) {
+        setIsModalOpen(false);
+        setFormData({ code: '', name: '', category_id: 1, price: '', min_stock: '5', unit: 'unidad' });
+        fetchProducts();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     p.code.toLowerCase().includes(searchTerm.toLowerCase())
@@ -47,7 +90,10 @@ export default function Inventory() {
           <h1 className="text-2xl font-bold text-white tracking-tight">Inventario & Kardex</h1>
           <p className="text-text-dim font-medium">Controla tus productos y almacenes centralizados.</p>
         </div>
-        <button className="inline-flex items-center gap-2 bg-accent text-bg-dark px-4 py-2.5 rounded-xl font-bold shadow-lg shadow-accent/20 hover:scale-[1.02] transition-all">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="inline-flex items-center gap-2 bg-accent text-bg-dark px-4 py-2.5 rounded-xl font-bold shadow-lg shadow-accent/20 hover:scale-[1.02] transition-all"
+        >
           <Plus size={20} />
           Nuevo Producto
         </button>
@@ -151,6 +197,118 @@ export default function Inventory() {
           )}
         </div>
       </div>
+
+      {/* New Product Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="glass-card w-full max-w-lg p-8 border-white/10 shadow-2xl relative overflow-hidden"
+          >
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent/0 via-accent/50 to-accent/0" />
+            
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-bold text-white tracking-tight">Agregar Nuevo Producto</h2>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="text-text-dim hover:text-white transition-colors"
+              >
+                <Plus size={24} className="rotate-45" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-text-dim uppercase tracking-widest">Código SKU</label>
+                  <input
+                    required
+                    value={formData.code}
+                    onChange={e => setFormData({ ...formData, code: e.target.value })}
+                    className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white text-sm outline-none focus:ring-1 focus:ring-accent transition-all"
+                    placeholder="PROD-001"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-text-dim uppercase tracking-widest">Categoría</label>
+                  <select
+                    value={formData.category_id}
+                    onChange={e => setFormData({ ...formData, category_id: parseInt(e.target.value) })}
+                    className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white text-sm outline-none focus:ring-1 focus:ring-accent transition-all appearance-none"
+                  >
+                    <option value={1} className="bg-bg-dark">Bebidas</option>
+                    <option value={2} className="bg-bg-dark">Alimentos</option>
+                    <option value={3} className="bg-bg-dark">Limpieza</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-text-dim uppercase tracking-widest">Nombre del Producto</label>
+                <input
+                  required
+                  value={formData.name}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white text-sm outline-none focus:ring-1 focus:ring-accent transition-all"
+                  placeholder="Ej. Coca Cola 1.5L"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-text-dim uppercase tracking-widest">Precio</label>
+                  <input
+                    required
+                    type="number"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={e => setFormData({ ...formData, price: e.target.value })}
+                    className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white text-sm outline-none focus:ring-1 focus:ring-accent transition-all"
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-text-dim uppercase tracking-widest">Stock Mín.</label>
+                  <input
+                    required
+                    type="number"
+                    value={formData.min_stock}
+                    onChange={e => setFormData({ ...formData, min_stock: e.target.value })}
+                    className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white text-sm outline-none focus:ring-1 focus:ring-accent transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-text-dim uppercase tracking-widest">Unidad</label>
+                  <input
+                    required
+                    value={formData.unit}
+                    onChange={e => setFormData({ ...formData, unit: e.target.value })}
+                    className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white text-sm outline-none focus:ring-1 focus:ring-accent transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 flex gap-3">
+                <button 
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 px-4 py-3 rounded-xl border border-white/10 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/5 transition-all text-center"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-[2] bg-accent text-bg-dark px-4 py-3 rounded-xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-accent/20 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isLoading ? 'Guardando...' : 'Guardar Producto'}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
