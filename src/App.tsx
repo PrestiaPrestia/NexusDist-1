@@ -85,21 +85,20 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar pb-4">
           <SidebarLink to="/" icon={LayoutDashboard}>Panel Principal</SidebarLink>
+          <SidebarLink to="/settings" icon={Settings}>Ajustes del Sistema</SidebarLink>
+          <div className="pt-2 pb-2 my-2 border-b border-white/5 opacity-50" />
           <SidebarLink to="/inventory" icon={Package}>Inventario</SidebarLink>
           <SidebarLink to="/sales" icon={ShoppingCart}>Nueva Venta</SidebarLink>
           <SidebarLink to="/clients" icon={Users}>Clientes</SidebarLink>
           <SidebarLink to="/history" icon={History}>Historial</SidebarLink>
           <SidebarLink to="/reports" icon={TrendingUp}>Caja y Reportes</SidebarLink>
           <SidebarLink to="/mobile" icon={Smartphone}>Venta Móvil</SidebarLink>
-          <div className="pt-4 mt-4 border-t border-white/5">
-            <SidebarLink to="/settings" icon={Settings}>Ajustes del Sistema</SidebarLink>
-          </div>
         </nav>
 
         <div className="mt-auto p-4 border-t border-glass-border">
           <div className="flex items-center gap-3 mb-4 px-2">
             <div className="w-9 h-9 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center text-accent font-bold">
-              {user?.full_name[0]}
+              {user?.full_name?.[0] || 'U'}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-white truncate">{user?.full_name}</p>
@@ -150,10 +149,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               </div>
               <nav className="space-y-1" onClick={() => setIsMobileMenuOpen(false)}>
                 <SidebarLink to="/" icon={LayoutDashboard}>Panel Principal</SidebarLink>
+                <SidebarLink to="/settings" icon={Settings}>Ajustes del Sistema</SidebarLink>
+                <div className="my-4 border-t border-white/5" />
                 <SidebarLink to="/inventory" icon={Package}>Inventario</SidebarLink>
                 <SidebarLink to="/sales" icon={ShoppingCart}>Nueva Venta</SidebarLink>
                 <SidebarLink to="/clients" icon={Users}>Clientes</SidebarLink>
-                <SidebarLink to="/settings" icon={Settings}>Ajustes del Sistema</SidebarLink>
                 <SidebarLink to="/mobile" icon={Smartphone}>Venta Móvil</SidebarLink>
               </nav>
             </div>
