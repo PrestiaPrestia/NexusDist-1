@@ -157,22 +157,12 @@ export default function Settings() {
 
           {activeTab === 'currency' && (
             <div className="max-w-2xl space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                 <div className="glass p-6 rounded-3xl border-white/10">
-                    <div className="flex items-center gap-3 mb-4">
-                       <div className="p-2 bg-yellow-500/20 text-yellow-500 rounded-lg"><Coins size={20}/></div>
-                       <h4 className="font-bold text-white">Moneda Base</h4>
-                    </div>
-                    <select className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none">
-                       <option value="USD" className="bg-bg-dark">Dólares Estadounidenses (USD)</option>
-                       <option value="EUR" className="bg-bg-dark">Euros (EUR)</option>
-                    </select>
-                 </div>
+              <div className="grid grid-cols-1 gap-8">
 
                  <div className="glass p-6 rounded-3xl border-white/10">
                     <div className="flex items-center gap-3 mb-4">
                        <div className="p-2 bg-blue-500/20 text-blue-500 rounded-lg"><RefreshCcw size={20}/></div>
-                       <h4 className="font-bold text-white">Moneda Local</h4>
+                       <h4 className="font-bold text-white">Moneda Local del Sistema</h4>
                     </div>
                      <select className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none">
                         <option value="PEN" className="bg-bg-dark">Soles Peruanos (PEN)</option>
