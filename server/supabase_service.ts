@@ -133,5 +133,14 @@ export const SupabaseService = {
     
     if (error) throw error;
     return data;
+  },
+
+  // Currencies
+  async getCurrencies() {
+    const { data, error } = await supabase
+      .from('currencies')
+      .select('*');
+    if (error) throw error;
+    return data;
   }
 };
