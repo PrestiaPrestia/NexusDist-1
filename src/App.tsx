@@ -44,6 +44,7 @@ import MobileSeller from './pages/MobileSeller';
 import HistoryPage from './pages/History'; // Avoid 'History' name conflict
 import Financial from './pages/Financial';
 import UsersPage from './pages/Users';
+import SettingsPage from './pages/Settings';
 
 const SidebarLink = ({ to, icon: Icon, children, onClick }: any) => {
   const location = useLocation();
@@ -88,8 +89,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <SidebarLink to="/clients" icon={Users}>Clientes</SidebarLink>
             <SidebarLink to="/history" icon={History}>Historial</SidebarLink>
             <SidebarLink to="/reports" icon={TrendingUp}>Caja y Reportes</SidebarLink>
-            <SidebarLink to="/users" icon={Shield}>Usuarios y Roles</SidebarLink>
             <SidebarLink to="/mobile" icon={Smartphone}>Venta Móvil</SidebarLink>
+            <div className="pt-2">
+              <SidebarLink to="/settings" icon={Settings}>Configuración</SidebarLink>
+            </div>
           </nav>
         </div>
 
@@ -150,7 +153,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 <SidebarLink to="/inventory" icon={Package}>Inventario</SidebarLink>
                 <SidebarLink to="/sales" icon={ShoppingCart}>Nueva Venta</SidebarLink>
                 <SidebarLink to="/clients" icon={Users}>Clientes</SidebarLink>
-                <SidebarLink to="/users" icon={Shield}>Usuarios</SidebarLink>
+                <SidebarLink to="/settings" icon={Settings}>Configuración</SidebarLink>
                 <SidebarLink to="/mobile" icon={Smartphone}>Venta Móvil</SidebarLink>
               </nav>
             </div>
@@ -216,6 +219,7 @@ export default function App() {
               <Route path="/history" element={<Layout><HistoryPage /></Layout>} />
               <Route path="/reports" element={<Layout><Financial /></Layout>} />
               <Route path="/users" element={<Layout><UsersPage /></Layout>} />
+              <Route path="/settings" element={<Layout><SettingsPage /></Layout>} />
               <Route path="/mobile" element={<Layout><MobileSeller /></Layout>} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </>
