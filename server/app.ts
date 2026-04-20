@@ -139,6 +139,43 @@ apiRouter.post("/cashflow", authenticateToken, async (req: any, res) => {
   }
 });
 
+// Users Management
+apiRouter.get("/users", authenticateToken, async (req, res) => {
+  try {
+    const users = await SupabaseService.getAllUsers();
+    res.json(users);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+apiRouter.post("/users", authenticateToken, async (req, res) => {
+  try {
+    const user = await SupabaseService.createUser(req.body);
+    res.json(user);
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+apiRouter.patch("/users/:id", authenticateToken, async (req, res) => {
+  try {
+    const user = await SupabaseService.updateUser(parseInt(req.params.id), req.body);
+    res.json(user);
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+apiRouter.delete("/users/:id", authenticateToken, async (req, res) => {
+  try {
+    await SupabaseService.deleteUser(parseInt(req.params.id));
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 // Mount the router at both /api (local) and / (serverless)
 app.use("/api", apiRouter);
 app.use("/", apiRouter);

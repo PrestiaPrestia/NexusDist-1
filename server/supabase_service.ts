@@ -142,5 +142,49 @@ export const SupabaseService = {
       .select('*');
     if (error) throw error;
     return data;
+  },
+
+  // Users Management
+  async getAllUsers() {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .order('full_name', { ascending: true });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async updateUser(id: number, userData: any) {
+    const { data, error } = await supabase
+      .from('users')
+      .update(userData)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async createUser(userData: any) {
+    const { data, error } = await supabase
+      .from('users')
+      .insert([userData])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteUser(id: number) {
+    const { error } = await supabase
+      .from('users')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+    return true;
   }
 };
