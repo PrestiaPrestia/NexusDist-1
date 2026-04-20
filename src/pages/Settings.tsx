@@ -173,20 +173,6 @@ export default function Settings() {
                  </div>
               </div>
 
-              <div className="p-6 bg-white/5 border border-white/10 rounded-3xl">
-                 <label className="text-[10px] font-black text-text-dim uppercase ml-1">Tipo de Cambio Actual</label>
-                 <div className="flex items-center gap-4 mt-2">
-                    <div className="text-2xl font-black text-white">1 USD = </div>
-                    <input 
-                      type="number" 
-                      value={config.exchangeRate}
-                      onChange={e => setConfig({...config, exchangeRate: e.target.value})}
-                      className="bg-accent/10 border border-accent/30 rounded-xl px-4 py-2 text-accent font-black text-2xl w-32 outline-none" 
-                    />
-                    <div className="text-2xl font-black text-white">{config.localCurrency}</div>
-                 </div>
-                 <p className="text-[10px] text-text-dim mt-4 uppercase font-bold tracking-widest italic">Última actualización: Hace 5 minutos (Sincronizado)</p>
-              </div>
             </div>
           )}
 
