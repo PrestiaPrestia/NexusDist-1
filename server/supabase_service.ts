@@ -186,5 +186,25 @@ export const SupabaseService = {
     
     if (error) throw error;
     return true;
+  },
+
+  // Clients
+  async getClients() {
+    const { data, error } = await supabase
+      .from('clients')
+      .select('*')
+      .order('name', { ascending: true });
+    if (error) throw error;
+    return data;
+  },
+
+  async addClient(clientData: any) {
+    const { data, error } = await supabase
+      .from('clients')
+      .insert([clientData])
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
   }
 };

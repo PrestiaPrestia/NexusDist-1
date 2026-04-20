@@ -176,6 +176,25 @@ apiRouter.delete("/users/:id", authenticateToken, async (req, res) => {
   }
 });
 
+// Clients
+apiRouter.get("/clients", authenticateToken, async (req, res) => {
+  try {
+    const clients = await SupabaseService.getClients();
+    res.json(clients);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+apiRouter.post("/clients", authenticateToken, async (req, res) => {
+  try {
+    const client = await SupabaseService.addClient(req.body);
+    res.json(client);
+  } catch (e: any) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 // Mount the router at both /api (local) and / (serverless)
 app.use("/api", apiRouter);
 app.use("/", apiRouter);
